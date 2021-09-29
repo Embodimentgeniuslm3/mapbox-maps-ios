@@ -14,6 +14,11 @@ internal protocol MapboxMapProtocol: AnyObject {
     func dragEnd()
 }
 
+public enum MapProjectionMode: String {
+    case mercator
+    case globe
+}
+
 public final class MapboxMap: MapboxMapProtocol {
     /// The underlying renderer object responsible for rendering the map
     private let __map: Map
@@ -398,6 +403,20 @@ extension MapboxMap: CameraManagerProtocol {
 
     public func dragEnd() {
         __map.dragEnd()
+    }
+    
+    // MARK: - Projection API
+    
+    public func setProjection(mode: MapProjectionMode) {
+        __map.setMapProjectionForProjection(["name": mode.rawValue])
+    }
+    
+    public func getMapProjection() throws -> MapProjectionMode {
+        guard let projName = (__map.getMapProjection() as? [String: String])?["name"],
+              let projection = MapProjectionMode.init(rawValue: projName) else {
+            throw TypeConversionError.invalidObject
+        }
+        return projection
     }
 }
 
