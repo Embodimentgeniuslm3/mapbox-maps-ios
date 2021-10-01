@@ -35,6 +35,7 @@ Mapbox welcomes participation and contributions from everyone.
 * `BasicCameraAnimator` no longer updates the camera a final time after being stopped or canceled prior to running to completion. ([#712](https://github.com/mapbox/mapbox-maps-ios/pull/712))
 * `BasicCameraAnimator.isReversed` is now settable. ([#712](https://github.com/mapbox/mapbox-maps-ios/pull/712))
 * The double tap, quick zoom, and double touch gestures now use the gesture's location in the view to anchor camera changes. Previously, they used the camera's center coordinate ([#722](https://github.com/mapbox/mapbox-maps-ios/pull/722))
+* Adds the `ExpressionArgument.geoJSONObject(_:)` case, which allows you to include a `Turf.GeoJSONObject` instance in an expression with the `Expression.Operator.distance` or `Expression.Operator.within` operator. ([#730](https://github.com/mapbox/mapbox-maps-ios/pull/730))
 
 ## 10.0.0-rc.9 - Sept 22, 2021
 

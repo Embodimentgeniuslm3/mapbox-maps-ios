@@ -1,5 +1,7 @@
 import XCTest
 @testable import MapboxMaps
+import Turf
+import CoreLocation
 
 final class ExpressionTests: XCTestCase {
 
@@ -96,5 +98,46 @@ final class ExpressionTests: XCTestCase {
         print(validArg)
 
         XCTAssertEqual(validArg, argument)
+    }
+
+    func testGeoJSONObjectExpression() throws {
+        let coloradoCorners: [CLLocationCoordinate2D] = [
+            .init(latitude: 37, longitude: -109-2/60-48/60/60),
+            .init(latitude: 37, longitude: -102-2/60-48/60/60),
+            .init(latitude: 41, longitude: -102-2/60-48/60/60),
+            .init(latitude: 41, longitude: -109-2/60-48/60/60),
+            .init(latitude: 37, longitude: -109-2/60-48/60/60),
+        ]
+        var colorado = Feature(geometry: .polygon(Polygon([coloradoCorners])))
+        colorado.identifier = "CO"
+        colorado.properties = [
+            "population": 5_773_714,
+        ]
+
+        let withinExpression = Exp(.within) {
+            GeoJSONObject.feature(colorado)
+        }
+        XCTAssertNotNil(withinExpression.arguments.first)
+        guard let withinObject = withinExpression.arguments.first else { return }
+        XCTAssertEqual(withinObject, .geoJSONObject(.feature(colorado)))
+
+        var withinData: Data?
+        XCTAssertNoThrow(withinData = try JSONEncoder().encode(withinExpression))
+        var withinJSON: [Any?]?
+        XCTAssertNoThrow(withinJSON = try withinData.flatMap {
+            try JSONSerialization.jsonObject(with: $0, options: []) as? [Any?]
+        })
+        XCTAssertNotNil(withinJSON)
+        XCTAssertEqual(withinJSON?.first as? String, "within")
+        XCTAssertEqual(withinJSON?.count, 2)
+
+        XCTAssertNotNil(withinJSON?.last as? [String: Any?])
+        guard let coloradoJSON = withinJSON?.last as? [String: Any?] else { return }
+
+        XCTAssertEqual(coloradoJSON.count, 4)
+        XCTAssertEqual(coloradoJSON["type"] as? String, "Feature")
+        XCTAssertEqual(coloradoJSON["id"] as? String, "CO")
+        XCTAssertEqual(coloradoJSON["properties"] as? [String: Int],
+                       ["population": 5_773_714])
     }
 }

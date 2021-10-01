@@ -1,5 +1,6 @@
 import Foundation
 import UIKit
+import Turf
 @_implementationOnly import MapboxCommon_Private
 
 #if swift(>=5.4)
@@ -88,5 +89,18 @@ extension Dictionary: ExpressionArgumentConvertible where Key == Double,
 extension UIColor: ExpressionArgumentConvertible {
     public var expressionArguments: [Expression.Argument] {
         return [.string(StyleColor(self).rgbaString)]
+    }
+}
+
+extension GeoJSONObject: ExpressionArgumentConvertible {
+    public var expressionArguments: [Expression.Argument] {
+        do {
+            let data = try JSONEncoder().encode(self)
+            let expression = try JSONDecoder().decode(Expression.Argument.self, from: data)
+            return [expression]
+        } catch {
+            // Throwable getters are new to Swift 5.5, so we’ll have to live with a fatal error for now.
+            fatalError("Unable to convert GeoJSON object to expression argument: \(error)")
+        }
     }
 }

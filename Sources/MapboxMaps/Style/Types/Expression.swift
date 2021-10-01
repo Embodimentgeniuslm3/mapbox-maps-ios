@@ -1,4 +1,5 @@
 import Foundation
+import Turf
 
 public typealias Exp = Expression
 
@@ -137,6 +138,7 @@ public struct Expression: Codable, CustomStringConvertible, Equatable {
         case numberArray([Double])
         case stringArray([String])
         case option(Option)
+        case geoJSONObject(GeoJSONObject)
         case null
         case expression(Expression)
 
@@ -154,6 +156,8 @@ public struct Expression: Codable, CustomStringConvertible, Equatable {
                 return "\(exp)"
             case .option(let option):
                 return "\(option)"
+            case .geoJSONObject(let object):
+                return "\(object)"
             case .numberArray(let array):
                 return "\(array)"
             case .stringArray(let stringArray):
@@ -171,6 +175,8 @@ public struct Expression: Codable, CustomStringConvertible, Equatable {
                 return lhsBool == rhsBool
             case (.option(let lhsOption), .option(let rhsOption)):
                 return lhsOption == rhsOption
+            case (.geoJSONObject(let lhsObject), .geoJSONObject(let rhsObject)):
+                return lhsObject == rhsObject
             case (.null, .null):
                 return true
             case (.expression(let lhsExpression), .expression(let rhsExpression)):
@@ -198,6 +204,8 @@ public struct Expression: Codable, CustomStringConvertible, Equatable {
                 try container.encode(boolean)
             case .option(let option):
                 try container.encode(option)
+            case .geoJSONObject(let object):
+                try container.encode(object)
             case .null:
                 try container.encodeNil()
             case .numberArray(let array):
@@ -217,6 +225,8 @@ public struct Expression: Codable, CustomStringConvertible, Equatable {
                 self = .number(validNumber)
             } else if let validBoolean = try? container.decode(Bool.self) {
                 self = .boolean(validBoolean)
+            } else if let object = try? container.decode(GeoJSONObject.self) {
+                self = .geoJSONObject(object)
             } else if let validExpression = try? container.decode(Expression.self) {
                 self = .expression(validExpression)
             } else if let validOption = try? container.decode(Option.self) {
